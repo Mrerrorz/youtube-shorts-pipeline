@@ -2,7 +2,7 @@ Write a YouTube Shorts script for the headline below.
 
 HEADLINE: {headline}
 
-Target length: 130-170 words spoken (about 60-80 seconds).
+Target length: 100-120 words spoken total (HARD CAP: must fit in 55 seconds at calm pace). YouTube Shorts cuts off at 60 seconds — going over kills reach. If you're at 110 words, stop. Tight beats long.
 
 Structure (mandatory — every section must exist):
 - hook: 1-2 sentences that create immediate tension or curiosity. No "Did you know", no "Here are 3 reasons", no introduction phrases. Open mid-thought.

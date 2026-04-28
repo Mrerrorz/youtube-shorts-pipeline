@@ -19,10 +19,11 @@ def _call_elevenlabs(script: str, voice_id: str, api_key: str) -> bytes:
             "text": script,
             "model_id": "eleven_multilingual_v2",
             "voice_settings": {
-                "stability": 0.4,
+                "stability": 0.55,
                 "similarity_boost": 0.85,
-                "style": 0.3,
+                "style": 0.25,
                 "use_speaker_boost": True,
+                "speed": 0.9,
             },
         },
         timeout=60,

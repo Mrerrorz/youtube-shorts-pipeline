@@ -54,12 +54,12 @@ def _get_speech_regions(audio_path: Path) -> list[tuple[float, float]]:
 def build_duck_filter(speech_regions: list[tuple[float, float]], buffer: float = 0.3) -> str:
     """Build ffmpeg volume filter expression for ducking during speech.
 
-    During speech: volume = 0.12
-    During gaps: volume = 0.25
+    During speech: volume = 0.18 (under voice, audibly present)
+    During gaps:   volume = 0.35 (fuller in the silences)
     Transitions smoothed by ±buffer seconds.
     """
     if not speech_regions:
-        return "volume=0.25"
+        return "volume=0.35"
 
     # Build between() conditions for speech regions
     conditions = []
@@ -70,7 +70,7 @@ def build_duck_filter(speech_regions: list[tuple[float, float]], buffer: float =
         conditions.append(f"between(t,{s:.2f},{e:.2f})")
 
     condition_expr = "+".join(conditions)
-    return f"volume='if({condition_expr}, 0.12, 0.25)':eval=frame"
+    return f"volume='if({condition_expr}, 0.18, 0.35)':eval=frame"
 
 
 def select_and_prepare_music(voiceover_path: Path, work_dir: Path) -> dict:

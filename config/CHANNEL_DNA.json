@@ -1,0 +1,27 @@
+{
+  "channel_name": "Silent Capital",
+  "tone": "sharp, premium, psychologically insightful",
+  "voice_style": "calm authority",
+  "hook_style": "curiosity first",
+  "caption_style": "minimal bold phrases",
+  "visual_style": "realistic business documentary",
+  "script_structure": [
+    "hook",
+    "insight",
+    "mechanism",
+    "takeaway"
+  ],
+  "forbidden": [
+    "generic motivation",
+    "vague finance advice",
+    "internet clichés",
+    "dramatic exaggeration"
+  ],
+  "allowed_topics": [
+    "money psychology",
+    "consumer behavior",
+    "business psychology",
+    "hidden pricing logic",
+    "financial decision patterns"
+  ]
+}

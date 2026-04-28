@@ -9,6 +9,7 @@ from PIL import Image
 from .config import VIDEO_WIDTH, VIDEO_HEIGHT, get_gemini_key, run_cmd
 from .log import log
 from .retry import with_retry
+from silent_capital.visual_fetcher import fetch_pexels_photo
 
 
 @with_retry(max_retries=3, base_delay=2.0)
@@ -52,18 +53,28 @@ def _fallback_frame(i: int, out_dir: Path) -> Path:
 
 
 def generate_broll(prompts: list, out_dir: Path) -> list[Path]:
-    """Generate 3 b-roll frames via Gemini Imagen, with fallback."""
-    api_key = get_gemini_key()
+    """Hybrid b-roll: Pexels real photos primary → Gemini Imagen fallback → solid color.
+
+    Silent Capital priority: realistic photography over AI-generated stills.
+    Imagen only kicks in when no Pexels match exists for the query.
+    """
     frames = []
+    api_key = ""
 
     for i, prompt in enumerate(prompts[:3]):
         out_path = out_dir / f"broll_{i}.png"
-        log(f"Generating b-roll frame {i+1}/3 via Gemini Imagen...")
 
+        log(f"Frame {i+1}/3: searching Pexels for '{prompt}'...")
+        if fetch_pexels_photo(prompt, out_path, log_fn=log):
+            frames.append(out_path)
+            continue
+
+        log(f"Frame {i+1}/3: falling back to Gemini Imagen...")
         try:
+            if not api_key:
+                api_key = get_gemini_key()
             _generate_image_gemini(prompt, out_path, api_key)
 
-            # Resize/crop to 9:16 portrait
             img = Image.open(out_path).convert("RGB")
             target_w, target_h = VIDEO_WIDTH, VIDEO_HEIGHT
             orig_w, orig_h = img.size
@@ -77,7 +88,7 @@ def generate_broll(prompts: list, out_dir: Path) -> list[Path]:
             frames.append(out_path)
 
         except Exception as e:
-            log(f"Frame {i+1} failed: {e} — using fallback")
+            log(f"Frame {i+1} Imagen also failed: {e} — using solid-color fallback")
             frames.append(_fallback_frame(i, out_dir))
 
     return frames

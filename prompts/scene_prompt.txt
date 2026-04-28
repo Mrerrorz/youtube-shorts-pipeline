@@ -1,0 +1,32 @@
+Break the script below into a renderable scene plan for a vertical Short.
+
+SCRIPT:
+{script}
+
+HEADLINE: {headline}
+HOOK: {hook}
+INSIGHT: {insight}
+MECHANISM: {mechanism}
+TAKEAWAY: {takeaway}
+
+Rules:
+- Produce 5 to 8 scenes. Total duration must be 60-80 seconds.
+- Each scene is 6-15 seconds. Hook gets the longest dwell (8-12s) so the visual lands.
+- Each scene maps to ONE clear visual the viewer holds in mind.
+- visual_query: a 3-6 word phrase a stock-footage search can match. Realistic, business-documentary feel. Examples: "phone scrolling shopping app", "hand counting cash table", "credit card checkout swipe". Avoid abstract metaphors.
+- caption: 2-5 word punchline phrase that will appear on screen. Punchy, not a full sentence.
+- emotion: one of curiosity | tension | recognition | discomfort | resolution.
+
+Forbidden visuals:
+- text-only screens
+- generic motivational imagery (sunsets, rocket ships, gold coins falling)
+- fantasy or surreal scenes
+- random unrelated footage
+
+Output STRICT JSON only:
+{{
+  "scenes": [
+    {{"scene": 1, "duration": 10, "visual_query": "...", "caption": "...", "emotion": "curiosity"}},
+    ...
+  ]
+}}

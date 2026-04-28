@@ -66,10 +66,55 @@ def _inline_keyboard(job_id: str) -> dict:
     }
 
 
+def _format_metadata_message(draft: dict) -> str:
+    """Upload-ready YouTube metadata, formatted for copy-paste in Telegram.
+
+    Telegram message limit is 4096 chars — comfortably fits all fields.
+    Each section uses a fenced code block so taps copy the raw text without
+    Markdown formatting bleeding into YouTube Studio.
+    """
+    title = draft.get("youtube_title", "").strip()
+    description = draft.get("youtube_description", "").strip()
+    tags = draft.get("youtube_tags", "").strip()
+    insta = draft.get("instagram_caption", "").strip()
+    thumb = draft.get("thumbnail_prompt", "").strip()
+    job_id = draft.get("job_id", "")
+
+    # Append #Shorts to title if not already present (YouTube algorithm signal)
+    if title and "#shorts" not in title.lower():
+        title_yt = f"{title} #Shorts"
+    else:
+        title_yt = title
+
+    # Description gets #Shorts at the top + YouTube best-practice CTAs
+    desc_yt = f"#Shorts\n\n{description}\n\n— Silent Capital"
+
+    return (
+        f"📋 *Upload metadata for job {job_id}*\n\n"
+        f"*Title:*\n```\n{title_yt}\n```\n"
+        f"*Description:*\n```\n{desc_yt}\n```\n"
+        f"*Tags:*\n```\n{tags}\n```\n"
+        f"*Instagram caption:*\n```\n{insta}\n```\n"
+        f"*Thumbnail prompt:* {thumb}"
+    )
+
+
+def _send_message(token: str, chat_id: str, text: str, parse_mode: str = "Markdown") -> None:
+    requests.post(
+        f"{API_BASE}{token}/sendMessage",
+        json={"chat_id": chat_id, "text": text, "parse_mode": parse_mode,
+              "disable_web_page_preview": True},
+        timeout=30,
+    )
+
+
 def send_for_approval(video_path: Path, draft: dict) -> dict:
     """Upload the rendered video to Telegram with inline action buttons.
 
-    Returns the Telegram message dict on success. Raises on transport error.
+    Sends two messages: (1) the video with hook/insight/takeaway + buttons,
+    (2) a follow-up with copy-paste-ready YouTube metadata.
+
+    Returns the first Telegram message dict on success. Raises on transport error.
     """
     import json as _json
 
@@ -94,6 +139,13 @@ def send_for_approval(video_path: Path, draft: dict) -> dict:
     body = r.json()
     if not body.get("ok"):
         raise RuntimeError(f"Telegram sendVideo error: {body}")
+
+    # Follow-up message with upload-ready metadata
+    try:
+        _send_message(token, chat_id, _format_metadata_message(draft))
+    except Exception:
+        pass  # metadata send is best-effort; video already delivered
+
     return body["result"]
 
 

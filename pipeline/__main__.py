@@ -330,6 +330,9 @@ def main():
     p_topics = sub.add_parser("topics", help="Discover trending topics")
     p_topics.add_argument("--limit", type=int, default=15, help="Max topics to show")
 
+    # bot — Telegram trigger listener (Silent Capital)
+    sub.add_parser("bot", help="Long-poll Telegram; send a headline → get a rendered Short")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -376,6 +379,9 @@ def main():
         cmd_run(args)
     elif args.cmd == "topics":
         cmd_topics(args)
+    elif args.cmd == "bot":
+        from silent_capital.bot_listener import run as run_bot
+        run_bot()
 
 
 if __name__ == "__main__":

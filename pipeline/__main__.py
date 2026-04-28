@@ -186,6 +186,56 @@ def cmd_upload(args):
     return url
 
 
+def cmd_approve(args):
+    """Send rendered video to Telegram, wait for Approve/Reject/Regen tap."""
+    import json
+    import shutil
+
+    from silent_capital.telegram_bot import send_for_approval, wait_for_decision
+
+    draft_path = Path(args.draft)
+    draft = json.loads(draft_path.read_text())
+    lang = args.lang
+    job_id = str(draft.get("job_id", "unknown"))
+
+    video_str = draft.get(f"video_{lang}", "")
+    video_path = Path(video_str) if video_str else None
+    if not video_path or not video_path.exists():
+        print(f"  No produced video found for lang={lang}. Run produce first.")
+        sys.exit(1)
+
+    print(f"\n  Sending to Telegram for approval (job {job_id})...")
+    send_for_approval(video_path, draft)
+    print(f"  Awaiting tap on Telegram (timeout {args.timeout}s)...")
+    decision = wait_for_decision(job_id, timeout=args.timeout)
+    print(f"\n  Decision: {decision}")
+
+    approved_dir = MEDIA_DIR / "approved"
+    rejected_dir = MEDIA_DIR / "rejected"
+
+    if decision == "approve":
+        approved_dir.mkdir(parents=True, exist_ok=True)
+        dest = approved_dir / video_path.name
+        shutil.copy(video_path, dest)
+        draft["approved"] = True
+        draft["approved_path"] = str(dest)
+        draft_path.write_text(json.dumps(draft, indent=2))
+        print(f"  Saved to: {dest}")
+        print("  Upload it manually via YouTube Studio (auto-upload disabled until 5 approved shorts).")
+    elif decision == "reject":
+        rejected_dir.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(video_path), rejected_dir / video_path.name)
+        draft["approved"] = False
+        draft_path.write_text(json.dumps(draft, indent=2))
+        print(f"  Moved to: {rejected_dir / video_path.name}")
+    elif decision == "regen":
+        print("  Regenerate signal received — re-run draft + produce with a tightened headline.")
+    else:  # timeout
+        print("  No tap received before timeout. Re-run `approve` later if you still want to review.")
+
+    return decision
+
+
 def cmd_run(args):
     draft_path = cmd_draft(args)
     if args.dry_run:
@@ -201,13 +251,13 @@ def cmd_run(args):
 
     video_path = cmd_produce(ProduceArgs())
 
-    class UploadArgs:
+    # Silent Capital v1 — Telegram approval gate, no auto-upload.
+    class ApproveArgs:
         draft = str(draft_path)
         lang = args.lang
-        force = False
+        timeout = 1800
 
-    url = cmd_upload(UploadArgs())
-    print(f"\n  Done! {url}")
+    cmd_approve(ApproveArgs())
 
 
 def cmd_topics(args):
@@ -260,6 +310,12 @@ def main():
     p_upload.add_argument("--draft", required=True)
     p_upload.add_argument("--lang", default="en", choices=["en", "hi"])
     p_upload.add_argument("--force", action="store_true", help="Re-upload even if done")
+
+    # approve (Silent Capital — Telegram review)
+    p_approve = sub.add_parser("approve", help="Send rendered video to Telegram for approval")
+    p_approve.add_argument("--draft", required=True)
+    p_approve.add_argument("--lang", default="en", choices=["en", "hi"])
+    p_approve.add_argument("--timeout", type=int, default=1800, help="Approval wait seconds")
 
     # run (full pipeline)
     p_run = sub.add_parser("run", help="Full pipeline: draft -> produce -> upload")
@@ -314,6 +370,8 @@ def main():
         cmd_produce(args)
     elif args.cmd == "upload":
         cmd_upload(args)
+    elif args.cmd == "approve":
+        cmd_approve(args)
     elif args.cmd == "run":
         cmd_run(args)
     elif args.cmd == "topics":

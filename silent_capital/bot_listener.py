@@ -16,8 +16,10 @@ phone, get a publishable Short back in ~2 minutes.
 import json
 import os
 import shutil
+import threading
 import time
 import traceback
+from datetime import datetime
 from pathlib import Path
 
 import requests
@@ -36,6 +38,55 @@ HELP_TEXT = (
     "title, description, tags, and Instagram caption are sent here too — "
     "ready to paste into YouTube Studio."
 )
+
+
+# Reminder slots: (hour, minute, label). Times are LOCAL machine time —
+# set your Mac to IST or override REMINDER_SLOTS in env if you travel.
+DEFAULT_SLOTS = [
+    (12, 25, "afternoon (12:30 PM upload)"),
+    (19, 55, "evening (8:00 PM upload)"),
+]
+
+
+def _parse_slots_env() -> list[tuple[int, int, str]]:
+    """Allow overriding via env: REMINDER_SLOTS=12:25=afternoon,19:55=evening"""
+    raw = os.environ.get("REMINDER_SLOTS", "").strip()
+    if not raw:
+        return DEFAULT_SLOTS
+    out = []
+    for chunk in raw.split(","):
+        chunk = chunk.strip()
+        if "=" not in chunk:
+            continue
+        time_part, label = chunk.split("=", 1)
+        try:
+            h, m = time_part.split(":")
+            out.append((int(h), int(m), label.strip()))
+        except ValueError:
+            continue
+    return out or DEFAULT_SLOTS
+
+
+def _reminder_loop(token: str, chat_id: str) -> None:
+    """Background thread: fire one reminder per slot per day. Local time."""
+    slots = _parse_slots_env()
+    fired_today: dict[tuple[int, int], str] = {}
+
+    while True:
+        now = datetime.now()
+        today_key = now.strftime("%Y-%m-%d")
+        for h, m, label in slots:
+            slot_id = (h, m)
+            already = fired_today.get(slot_id)
+            if already == today_key:
+                continue
+            if now.hour == h and now.minute == m:
+                _send(token, chat_id,
+                      f"🔔 *Reminder — {label}*\n\n"
+                      f"Time to draft your next Short. Send a headline as a "
+                      f"text message and I'll render it (~2 min).")
+                fired_today[slot_id] = today_key
+        time.sleep(30)
 
 
 def _config() -> tuple[str, str]:
@@ -174,9 +225,19 @@ def _handle_callback(token: str, chat_id: str, cb: dict) -> None:
 
 def run() -> None:
     token, allowed_chat_id = _config()
+    slots = _parse_slots_env()
+    slot_str = ", ".join(f"{h:02d}:{m:02d}" for h, m, _ in slots)
     print(f"Silent Capital bot listening (chat_id={allowed_chat_id}). Ctrl+C to stop.")
+    print(f"Daily reminder slots (local time): {slot_str}")
+
+    threading.Thread(
+        target=_reminder_loop, args=(token, allowed_chat_id), daemon=True,
+    ).start()
+
     _send(token, allowed_chat_id,
-          "🟢 *Silent Capital bot is online.*\nSend a headline to generate a Short.")
+          f"🟢 *Silent Capital bot is online.*\n"
+          f"Send a headline to generate a Short.\n\n"
+          f"_Daily reminders set for {slot_str} (local time)._")
 
     offset = 0
     while True:

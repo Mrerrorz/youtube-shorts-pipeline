@@ -1,10 +1,29 @@
 """ffmpeg video assembly — frames + voiceover + music + captions."""
 
+import subprocess
+from functools import lru_cache
 from pathlib import Path
 
 from .broll import animate_frame
 from .config import MEDIA_DIR, run_cmd
 from .log import log
+
+
+@lru_cache(maxsize=1)
+def _ffmpeg_has_ass_filter() -> bool:
+    """Check whether the local ffmpeg has the ass filter (libass) compiled in.
+
+    Caption burn-in requires libass. Brew's mainline ffmpeg bottle currently
+    ships without it on Apple Silicon. When missing, we skip burn-in and rely
+    on the SRT file being uploaded alongside the video for YouTube captions.
+    """
+    try:
+        out = subprocess.run(
+            ["ffmpeg", "-filters"], capture_output=True, text=True, timeout=10
+        ).stdout
+        return any(line.split()[1:2] == ["ass"] for line in out.splitlines() if line.strip())
+    except Exception:
+        return False
 
 
 def get_audio_duration(path: Path) -> float:
@@ -56,14 +75,14 @@ def assemble_video(
     # Build the final ffmpeg command with optional captions + music
     out_path = MEDIA_DIR / f"pipeline_{job_id}_{lang}.mp4"
 
-    # Determine video filter (captions via ASS)
+    # Determine video filter (captions via ASS, requires libass)
     vf_parts = []
     if ass_path and Path(ass_path).exists():
-        # Escape special chars in path for ffmpeg filter, then wrap in single
-        # quotes so ffmpeg treats the whole thing as one filename token.
-        # Without the quotes, ffmpeg parses `/` as filter-graph option separator.
-        escaped_ass = str(ass_path).replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
-        vf_parts.append(f"ass='{escaped_ass}'")
+        if _ffmpeg_has_ass_filter():
+            escaped_ass = str(ass_path).replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
+            vf_parts.append(f"ass='{escaped_ass}'")
+        else:
+            log("ffmpeg lacks libass — skipping burned-in captions (SRT will be uploaded with video)")
     vf = ",".join(vf_parts) if vf_parts else None
 
     if music_path and Path(music_path).exists():

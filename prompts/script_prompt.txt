@@ -11,7 +11,7 @@ Structure (mandatory — every section must exist):
 - takeaway: one line of practical advice the viewer can act on tomorrow.
 
 Also produce:
-- broll_prompts: 3 short phrases (3-6 words each) describing realistic visuals for stock-footage search. Examples: "person scrolling shopping app", "hand counting cash on table", "credit card swipe at register". Avoid abstract or fantasy imagery.
+- broll_prompts: EXACTLY 10 short phrases (3-6 words each) describing realistic visuals for stock-footage search. Each phrase represents one ~5-7 second scene — quick cuts hold attention. Examples: "person scrolling shopping app", "hand counting cash on table", "credit card swipe at register". Avoid abstract or fantasy imagery. The 10 visuals should follow the script's emotional arc: hook (2 visuals) → tension (2) → mechanism (2) → recognition (2) → resolution (2). Each phrase should be DIFFERENT — vary subjects, angles, and props.
 - youtube_title: under 70 characters, retention-bait but not clickbait. Curiosity > shock.
 - youtube_description: 2-3 sentences with one concrete hook from the script.
 - youtube_tags: comma-separated, 5-8 tags, niche-specific (avoid generic "finance" or "money").
@@ -25,7 +25,7 @@ Output STRICT JSON only matching this exact schema:
   "mechanism": "...",
   "takeaway": "...",
   "script": "<hook + insight + mechanism + takeaway concatenated as one continuous voiceover, no section labels, no line breaks>",
-  "broll_prompts": ["...", "...", "..."],
+  "broll_prompts": ["...", "...", "...", "...", "...", "...", "...", "...", "...", "..."],
   "youtube_title": "...",
   "youtube_description": "...",
   "youtube_tags": "tag1,tag2,tag3",

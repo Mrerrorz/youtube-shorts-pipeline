@@ -46,10 +46,10 @@ def generate_draft(news: str, channel_context: str = "") -> dict:
             draft[field] = str(draft[field])
 
     if not isinstance(draft.get("broll_prompts"), list):
-        draft["broll_prompts"] = ["realistic shopping scene"] * 3
+        draft["broll_prompts"] = ["realistic shopping scene"] * 10
     else:
-        draft["broll_prompts"] = [str(p) for p in draft["broll_prompts"][:3]]
-        while len(draft["broll_prompts"]) < 3:
+        draft["broll_prompts"] = [str(p) for p in draft["broll_prompts"][:10]]
+        while len(draft["broll_prompts"]) < 10:
             draft["broll_prompts"].append("realistic business scene")
 
     draft["news"] = news

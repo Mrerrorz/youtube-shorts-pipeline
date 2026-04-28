@@ -32,11 +32,20 @@ def _call_elevenlabs(script: str, voice_id: str, api_key: str) -> bytes:
     return r.content
 
 
+def _normalize_for_say(script: str) -> str:
+    """macOS 'say' can't pronounce ₹ — transliterate before TTS so Whisper
+    doesn't transcribe '₹50,000' as '$50,000'. ElevenLabs path skips this."""
+    return (
+        script.replace("₹", "rupees ")
+              .replace("  ", " ")
+    )
+
+
 def _say_fallback(script: str, out_dir: Path) -> Path:
     """macOS 'say' fallback TTS."""
     out_path = out_dir / "voiceover_say.aiff"
     mp3_path = out_dir / "voiceover_say.mp3"
-    run_cmd(["say", "-o", str(out_path), script])
+    run_cmd(["say", "-o", str(out_path), _normalize_for_say(script)])
     run_cmd([
         "ffmpeg", "-i", str(out_path), "-acodec", "libmp3lame",
         str(mp3_path), "-y", "-loglevel", "quiet",

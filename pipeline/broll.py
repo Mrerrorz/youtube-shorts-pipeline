@@ -61,15 +61,16 @@ def generate_broll(prompts: list, out_dir: Path) -> list[Path]:
     frames = []
     api_key = ""
 
-    for i, prompt in enumerate(prompts[:3]):
+    n = len(prompts) or 1
+    for i, prompt in enumerate(prompts):
         out_path = out_dir / f"broll_{i}.png"
 
-        log(f"Frame {i+1}/3: searching Pexels for '{prompt}'...")
+        log(f"Frame {i+1}/{n}: searching Pexels for '{prompt}'...")
         if fetch_pexels_photo(prompt, out_path, log_fn=log):
             frames.append(out_path)
             continue
 
-        log(f"Frame {i+1}/3: falling back to Gemini Imagen...")
+        log(f"Frame {i+1}/{n}: falling back to Gemini Imagen...")
         try:
             if not api_key:
                 api_key = get_gemini_key()

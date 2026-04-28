@@ -73,8 +73,12 @@ def _generate_ass(words: list[dict], output_path: Path, video_width: int = 1080,
     White text for inactive words, yellow for current word.
     Semi-transparent background, positioned at lower third (~70% down).
     """
-    # ASS header
-    margin_v = int(video_height * 0.25)  # ~75% down from top = 25% from bottom
+    # ASS header — Silent Capital caption style:
+    # - Helvetica Neue Bold @ 96pt for premium feel and readability on small phones
+    # - White primary, yellow word highlight, heavy black outline (6px) for any background
+    # - Bottom-third placement (alignment=2, MarginV ~ video_height * 0.32) — sits in
+    #   the visual sweet spot Shorts viewers track without blocking the frame
+    margin_v = int(video_height * 0.32)
     header = f"""[Script Info]
 Title: Pipeline Captions
 ScriptType: v4.00+
@@ -84,7 +88,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial,72,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,3,3,0,2,40,40,{margin_v},1
+Style: Default,Helvetica Neue,96,&H00FFFFFF,&H0000FFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,6,2,2,60,60,{margin_v},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text

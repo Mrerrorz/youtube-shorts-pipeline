@@ -1,0 +1,34 @@
+Write a YouTube Shorts script for the headline below.
+
+HEADLINE: {headline}
+
+Target length: 130-170 words spoken (about 60-80 seconds).
+
+Structure (mandatory — every section must exist):
+- hook: 1-2 sentences that create immediate tension or curiosity. No "Did you know", no "Here are 3 reasons", no introduction phrases. Open mid-thought.
+- insight: the one sharp psychological observation viewers will remember. Concrete, not abstract.
+- mechanism: WHY this happens — the cognitive bias, pricing trick, or business pattern at work. Name it if it has a name.
+- takeaway: one line of practical advice the viewer can act on tomorrow.
+
+Also produce:
+- broll_prompts: 3 short phrases (3-6 words each) describing realistic visuals for stock-footage search. Examples: "person scrolling shopping app", "hand counting cash on table", "credit card swipe at register". Avoid abstract or fantasy imagery.
+- youtube_title: under 70 characters, retention-bait but not clickbait. Curiosity > shock.
+- youtube_description: 2-3 sentences with one concrete hook from the script.
+- youtube_tags: comma-separated, 5-8 tags, niche-specific (avoid generic "finance" or "money").
+- instagram_caption: 1-2 sentences plus 3 hashtags.
+- thumbnail_prompt: a single visual idea — realistic, business-documentary feel.
+
+Output STRICT JSON only matching this exact schema:
+{{
+  "hook": "...",
+  "insight": "...",
+  "mechanism": "...",
+  "takeaway": "...",
+  "script": "<hook + insight + mechanism + takeaway concatenated as one continuous voiceover, no section labels, no line breaks>",
+  "broll_prompts": ["...", "...", "..."],
+  "youtube_title": "...",
+  "youtube_description": "...",
+  "youtube_tags": "tag1,tag2,tag3",
+  "instagram_caption": "...",
+  "thumbnail_prompt": "..."
+}}

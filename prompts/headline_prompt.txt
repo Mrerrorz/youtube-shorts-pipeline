@@ -1,0 +1,29 @@
+Generate {count} candidate Shorts headlines for the topic seed below.
+
+TOPIC SEED: {seed}
+
+Each headline must:
+- create curiosity in under 8 words when possible
+- contain tension or contradiction (something that should not be true but is)
+- avoid generic finance phrasing ("how to save money", "why you should invest")
+- sound premium and observational, not motivational
+- relate to money psychology, consumer behavior, hidden pricing, or financial decision patterns
+
+Forbidden:
+- "Did you know..."
+- "Top X..."
+- "How to..."
+- exclamation marks
+- emojis
+
+Score each headline 1-10 on retention potential. A 9-10 must feel like a viewer would pause mid-scroll because the claim is unexpectedly specific or contrarian.
+
+Also tag the dominant emotion: curiosity | tension | recognition | mild discomfort.
+
+Output STRICT JSON only:
+{{
+  "candidates": [
+    {{"headline": "...", "score": 9, "emotion": "curiosity"}},
+    ...
+  ]
+}}

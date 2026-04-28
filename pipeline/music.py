@@ -54,12 +54,15 @@ def _get_speech_regions(audio_path: Path) -> list[tuple[float, float]]:
 def build_duck_filter(speech_regions: list[tuple[float, float]], buffer: float = 0.3) -> str:
     """Build ffmpeg volume filter expression for ducking during speech.
 
-    During speech: volume = 0.18 (under voice, audibly present)
-    During gaps:   volume = 0.35 (fuller in the silences)
+    During speech: volume = 0.13 (well under voice, atmosphere only)
+    During gaps:   volume = 0.25 (fills silences without taking over)
     Transitions smoothed by ±buffer seconds.
+
+    Note: assemble.py runs `loudnorm` before this filter, so the input is
+    normalized to ~-23 LUFS regardless of how hot the source MP3 was.
     """
     if not speech_regions:
-        return "volume=0.35"
+        return "volume=0.25"
 
     # Build between() conditions for speech regions
     conditions = []
@@ -70,7 +73,7 @@ def build_duck_filter(speech_regions: list[tuple[float, float]], buffer: float =
         conditions.append(f"between(t,{s:.2f},{e:.2f})")
 
     condition_expr = "+".join(conditions)
-    return f"volume='if({condition_expr}, 0.18, 0.35)':eval=frame"
+    return f"volume='if({condition_expr}, 0.13, 0.25)':eval=frame"
 
 
 def select_and_prepare_music(voiceover_path: Path, work_dir: Path) -> dict:

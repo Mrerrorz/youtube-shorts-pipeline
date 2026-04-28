@@ -89,8 +89,13 @@ def assemble_video(
         # Three inputs: video, voiceover, music
         cmd = ["ffmpeg", "-i", str(merged_video), "-i", str(voiceover)]
 
-        # Loop music to match video duration, apply ducking
-        music_filter = f"[2:a]aloop=loop=-1:size=2e+09,atrim=0:{duration}"
+        # Loop, trim, normalize loudness, then apply duck.
+        # loudnorm flattens hot/quiet tracks to a consistent -23 LUFS so the
+        # duck levels in music.py give the same perceived balance every render.
+        music_filter = (
+            f"[2:a]aloop=loop=-1:size=2e+09,atrim=0:{duration},"
+            f"loudnorm=I=-23:TP=-2:LRA=7"
+        )
         if duck_filter:
             music_filter += f",{duck_filter}"
         music_filter += "[music]"

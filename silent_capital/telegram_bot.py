@@ -43,12 +43,15 @@ def _format_caption(draft: dict) -> str:
     """Build a Telegram caption from the draft. Telegram limit is 1024 chars."""
     title = draft.get("youtube_title", draft.get("news", "(untitled)"))
     hook = draft.get("hook", "")
-    insight = draft.get("insight", "")
+    # pivot_line is the new structural field; fall back to legacy "insight" if older draft
+    pivot = draft.get("pivot_line", draft.get("insight", ""))
+    mechanism = draft.get("mechanism", "")
     takeaway = draft.get("takeaway", "")
     text = (
         f"*{title}*\n\n"
         f"*Hook:* {hook}\n"
-        f"*Insight:* {insight}\n"
+        f"*Pivot:* {pivot}\n"
+        f"*Mechanism:* {mechanism}\n"
         f"*Takeaway:* {takeaway}"
     )
     if len(text) > 1000:

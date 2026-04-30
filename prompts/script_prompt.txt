@@ -2,30 +2,36 @@ Write a YouTube Shorts script for the headline below.
 
 HEADLINE: {headline}
 
-Target length: 100-120 words spoken total (HARD CAP: must fit in 55 seconds at calm pace). YouTube Shorts cuts off at 60 seconds — going over kills reach. If you're at 110 words, stop. Tight beats long.
+CRITICAL LENGTH RULE — read carefully:
+- Target: 70-85 words spoken total
+- HARD CAP: must fit in 32 seconds at calm pace
+- Why: data shows Shorts retention drops at ~15s. At 30s total, 15s drop-off = 50% APV (algorithm-friendly). At 53s, 15s drop-off = 28% APV (algorithm-killer).
+- Tight beats long. Cut anything that doesn't earn its second.
 
 Structure (mandatory — every section must exist):
-- hook: 1-2 sentences that create immediate tension or curiosity. No "Did you know", no "Here are 3 reasons", no introduction phrases. Open mid-thought.
-- insight: the one sharp psychological observation viewers will remember. Concrete, not abstract.
-- mechanism: WHY this happens — the cognitive bias, pricing trick, or business pattern at work. Name it if it has a name.
-- takeaway: one line of practical advice the viewer can act on tomorrow.
+- hook: 1 sentence (max 2) that creates immediate tension or curiosity. Open mid-thought, mid-action, or mid-contradiction. No "Did you know", no "Here are 3 reasons", no introduction phrases. Aim for ~12-18 words.
+- pivot_line: a sharp pattern-interrupt line that resets attention at ~40% of the script. Phrases like: "But here's the trap." / "Here's what nobody tells you." / "Watch what happens next." / "And then it gets worse." This verbal pivot fights the mid-video drop-off. Aim for 4-8 words.
+- mechanism: WHY this happens — the cognitive bias, pricing trick, or business pattern. Name it if it has a name (mental accounting, anchoring, loss aversion, payment decoupling). 2 sentences max, ~25-35 words.
+- takeaway: one line of practical advice the viewer can act on tomorrow. 1 sentence, ~10-15 words.
+
+The "script" field below must read naturally as continuous voiceover, with the pivot_line embedded inline (not labeled). Order: hook → pivot_line → mechanism → takeaway.
 
 Also produce:
-- broll_prompts: EXACTLY 10 short phrases (3-6 words each) describing realistic visuals for stock-footage search. Each phrase represents one ~5-7 second scene — quick cuts hold attention. Examples: "person scrolling shopping app", "hand counting cash on table", "credit card swipe at register". Avoid abstract or fantasy imagery. The 10 visuals should follow the script's emotional arc: hook (2 visuals) → tension (2) → mechanism (2) → recognition (2) → resolution (2). Each phrase should be DIFFERENT — vary subjects, angles, and props.
-- youtube_title: under 70 characters, retention-bait but not clickbait. Curiosity > shock.
-- youtube_description: 2-3 sentences with one concrete hook from the script.
-- youtube_tags: comma-separated, 5-8 tags, niche-specific (avoid generic "finance" or "money").
+- broll_prompts: EXACTLY 8 short phrases (3-6 words each) describing realistic visuals for stock-footage search. Each phrase = one ~4-second scene. Examples: "person scrolling shopping app", "hand counting cash on table", "credit card swipe at register". Avoid abstract/fantasy imagery. Vary subjects, angles, props — DO NOT repeat similar visuals. The 8 visuals follow the script arc: hook (2) → pivot/mechanism (3) → recognition (2) → resolution (1).
+- youtube_title: under 70 characters, curiosity-driven, no clickbait. Should match the headline tone but tighter.
+- youtube_description: 2-3 sentences with one concrete hook from the script. End with a soft CTA like "Follow for more money psychology." (no spammy emojis).
+- youtube_tags: comma-separated, 5-8 tags, niche-specific (avoid generic "finance" / "money"). Mix English + 1-2 Hindi tags if topic is India-specific.
 - instagram_caption: 1-2 sentences plus 3 hashtags.
 - thumbnail_prompt: a single visual idea — realistic, business-documentary feel.
 
 Output STRICT JSON only matching this exact schema:
 {{
   "hook": "...",
-  "insight": "...",
+  "pivot_line": "...",
   "mechanism": "...",
   "takeaway": "...",
-  "script": "<hook + insight + mechanism + takeaway concatenated as one continuous voiceover, no section labels, no line breaks>",
-  "broll_prompts": ["...", "...", "...", "...", "...", "...", "...", "...", "...", "..."],
+  "script": "<hook + pivot_line + mechanism + takeaway concatenated as one continuous voiceover, no section labels, no line breaks>",
+  "broll_prompts": ["...", "...", "...", "...", "...", "...", "...", "..."],
   "youtube_title": "...",
   "youtube_description": "...",
   "youtube_tags": "tag1,tag2,tag3",

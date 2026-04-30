@@ -37,7 +37,7 @@ def generate_draft(news: str, channel_context: str = "") -> dict:
     draft = call_json(full_prompt, max_tokens=2000, temperature=0.7)
 
     expected_str = [
-        "hook", "insight", "mechanism", "takeaway", "script",
+        "hook", "pivot_line", "mechanism", "takeaway", "script",
         "youtube_title", "youtube_description", "youtube_tags",
         "instagram_caption", "thumbnail_prompt",
     ]
@@ -46,10 +46,10 @@ def generate_draft(news: str, channel_context: str = "") -> dict:
             draft[field] = str(draft[field])
 
     if not isinstance(draft.get("broll_prompts"), list):
-        draft["broll_prompts"] = ["realistic shopping scene"] * 10
+        draft["broll_prompts"] = ["realistic shopping scene"] * 8
     else:
-        draft["broll_prompts"] = [str(p) for p in draft["broll_prompts"][:10]]
-        while len(draft["broll_prompts"]) < 10:
+        draft["broll_prompts"] = [str(p) for p in draft["broll_prompts"][:8]]
+        while len(draft["broll_prompts"]) < 8:
             draft["broll_prompts"].append("realistic business scene")
 
     draft["news"] = news

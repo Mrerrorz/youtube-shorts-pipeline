@@ -1,0 +1,11 @@
+{
+  "channel_name": "Default Channel",
+  "tone": "calm, professional, observational",
+  "voice_style": "calm authority",
+  "hook_style": "curiosity first",
+  "caption_style": "minimal bold phrases",
+  "visual_style": "realistic business documentary",
+  "script_structure": ["hook", "pivot", "mechanism", "takeaway"],
+  "forbidden": ["generic motivation", "vague advice", "internet clichés"],
+  "allowed_topics": ["any"]
+}

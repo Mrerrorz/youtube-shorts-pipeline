@@ -7,6 +7,7 @@ import requests
 from .config import VOICE_ID_EN, VOICE_ID_HI, get_elevenlabs_key, run_cmd
 from .log import log
 from .retry import with_retry
+from silent_capital import client_config
 
 
 @with_retry(max_retries=3, base_delay=2.0)
@@ -54,9 +55,21 @@ def _say_fallback(script: str, out_dir: Path) -> Path:
     return mp3_path
 
 
-def generate_voiceover(script: str, out_dir: Path, lang: str = "en") -> Path:
-    """Generate voiceover via ElevenLabs, with macOS 'say' fallback."""
-    voice_id = VOICE_ID_HI if lang == "hi" else VOICE_ID_EN
+def generate_voiceover(script: str, out_dir: Path, lang: str = "en", *, client_name: str | None = None) -> Path:
+    """Generate voiceover via ElevenLabs, with macOS 'say' fallback.
+
+    Voice ID resolution order:
+      1. client config (clients/<name>/voice_id.txt) if Hindi not requested
+      2. env VOICE_ID_HI/EN
+    """
+    if lang == "hi":
+        voice_id = VOICE_ID_HI
+    else:
+        try:
+            cfg = client_config.load(client_name)
+            voice_id = cfg.voice_id
+        except Exception:
+            voice_id = VOICE_ID_EN
     api_key = get_elevenlabs_key()
 
     if not api_key:

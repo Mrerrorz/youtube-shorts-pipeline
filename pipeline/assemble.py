@@ -4,7 +4,7 @@ import subprocess
 from functools import lru_cache
 from pathlib import Path
 
-from .broll import animate_frame
+from .broll import animate_frame, trim_video_clip
 from .config import MEDIA_DIR, run_cmd
 from .log import log
 
@@ -52,11 +52,17 @@ def assemble_video(
     per_frame = duration / len(frames)
     effects = ["zoom_in", "pan_right", "zoom_out"]
 
-    # Animate each frame with Ken Burns effect
+    # Process each asset: videos get trimmed/scaled, images get Ken Burns
     animated = []
     for i, frame in enumerate(frames):
         anim = out_dir / f"anim_{i}.mp4"
-        animate_frame(frame, anim, per_frame + 0.1, effects[i % len(effects)])
+        suffix = Path(frame).suffix.lower()
+        if suffix in (".mp4", ".mov", ".webm", ".m4v"):
+            # Pexels video clip — trim to per_frame duration, scale to 1080x1920
+            trim_video_clip(Path(frame), anim, per_frame + 0.1)
+        else:
+            # Still image — apply Ken Burns
+            animate_frame(Path(frame), anim, per_frame + 0.1, effects[i % len(effects)])
         animated.append(anim)
 
     # Concat animated segments (escape single quotes for ffmpeg concat demuxer)

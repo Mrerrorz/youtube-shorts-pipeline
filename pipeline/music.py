@@ -1,19 +1,33 @@
-"""Background music — track selection + volume ducking."""
+"""Background music — per-client track selection + volume ducking."""
 
 import random
 from pathlib import Path
 
 from .log import log
+from silent_capital import client_config
 
-# Music directory ships with the package
+# Legacy global music dir (used as fallback if client has no music)
 MUSIC_DIR = Path(__file__).resolve().parent.parent / "music"
 
 
-def _find_tracks() -> list[Path]:
-    """Find all MP3 tracks in the music/ directory."""
-    if not MUSIC_DIR.exists():
-        return []
-    return sorted(MUSIC_DIR.glob("*.mp3"))
+def _find_tracks(client_name: str | None = None) -> list[Path]:
+    """Find all MP3 tracks for the active client.
+
+    Resolution order:
+      1. clients/<name>/music/*.mp3
+      2. clients/shared/music/*.mp3
+      3. legacy ./music/*.mp3
+    """
+    try:
+        cfg = client_config.load(client_name)
+        client_tracks = sorted(cfg.music_dir.glob("*.mp3"))
+        if client_tracks:
+            return client_tracks
+    except Exception:
+        pass
+    if MUSIC_DIR.exists():
+        return sorted(MUSIC_DIR.glob("*.mp3"))
+    return []
 
 
 def _get_speech_regions(audio_path: Path) -> list[tuple[float, float]]:
@@ -76,14 +90,14 @@ def build_duck_filter(speech_regions: list[tuple[float, float]], buffer: float =
     return f"volume='if({condition_expr}, 0.13, 0.25)':eval=frame"
 
 
-def select_and_prepare_music(voiceover_path: Path, work_dir: Path) -> dict:
+def select_and_prepare_music(voiceover_path: Path, work_dir: Path, *, client_name: str | None = None) -> dict:
     """Select a random track, build duck filter from speech regions.
 
     Returns dict with track_path and duck_filter for use by assemble.py.
     """
-    tracks = _find_tracks()
+    tracks = _find_tracks(client_name)
     if not tracks:
-        log("No music tracks found in music/ — skipping background music")
+        log("No music tracks found for this client — skipping background music")
         return {}
 
     track = random.choice(tracks)

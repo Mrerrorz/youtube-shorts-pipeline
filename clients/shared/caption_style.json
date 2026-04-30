@@ -1,0 +1,13 @@
+{
+  "fontname": "Helvetica Neue",
+  "fontsize": 96,
+  "primary_color_bgr": "&H00FFFFFF",
+  "highlight_color_bgr": "&H0000FFFF",
+  "outline_color_bgr": "&H00000000",
+  "outline_width": 6,
+  "shadow_depth": 2,
+  "alignment": 2,
+  "margin_v_pct": 0.32,
+  "margin_h": 60,
+  "bold": true
+}
